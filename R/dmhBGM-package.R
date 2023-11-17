@@ -1,4 +1,4 @@
-#' bgms: Bayesian Analysis of Graphical Models
+#' dmhBGM: Bayesian Analysis of Graphical Models using DMH
 #'
 #' @description
 #' The \code{R} package \strong{dmhBGM} is a derivative of the \code{R} package
