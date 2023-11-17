@@ -37,6 +37,16 @@ recommended to run the Gibbs sampler for at least \code{1e5} iterations.}
 is saved. Since it may take some time for the Gibbs sampler to converge to
 the posterior distribution, it is recommended not to set this number too low.}
 
+\item{dmhsamples}{The DMH approach generates a new, augmented data set to
+update model parameters with Metropolis Hastings. It must generate a new
+augmented data set for each parameter of the model in each iteration of the
+Gibbs sampler. Since we cannot sample these data directly from the MRF, we
+must use a Gibbs sampler to generate them.  The dmhsamples argument controls how
+many iterations are used for this "inner" Gibbs sampler. The default of
+\code{1} is for illustrative purposes. For stable estimates,
+\insertCite{ParkEtAl_2020}{dmhBGM} recommend running the DMH-Gibbs sampler
+for at least \code{n * p} iterations.}
+
 \item{cauchy_scale}{The scale of the Cauchy prior for interactions. Defaults
 to \code{2.5}.}
 
@@ -79,16 +89,6 @@ posterior means (\code{save = FALSE})? Defaults to \code{FALSE}.}
 \item{display_progress}{Should the function show a progress bar
 (\code{display_progress = TRUE})? Or not (\code{display_progress = FALSE})?
 Defaults to \code{TRUE}.}
-
-\item{dmhsampless}{The DMH approach generates a new, augmented data set to
-update model parameters with Metropolis Hastings. It must generate a new
-augmented data set for each parameter of the model in each iteration of the
-Gibbs sampler. Since we cannot sample these data directly from the MRF, we
-must use a Gibbs sampler to generate them.  The dmhsamples argument controls how
-many iterations are used for this "inner" Gibbs sampler. The default of
-\code{1} is for illustrative purposes. For stable estimates,
-\insertCite{ParkEtAl_2020}{dmhBGM} recommend running the DMH-Gibbs sampler
-for at least \code{n * p} iterations.}
 }
 \value{
 If \code{save = FALSE} (the default), the result is a list of class
@@ -139,4 +139,7 @@ Beta-prime distribution is used for the exponent of the category parameters.
 Two prior distributions are implemented for edge inclusion variables (i.e.,
 the prior probability that an edge is included); the Bernoulli prior and the
 Beta-Bernoulli prior.
+}
+\references{
+\insertAllCited{}
 }

@@ -106,6 +106,9 @@
 #' }
 #' Column averages of these matrices provide the model-averaged posterior means.
 #'
+#' @references
+#' \insertAllCited{}
+#'
 #' @export
 dmhbgm = function(x,
                   iter = 1e4,

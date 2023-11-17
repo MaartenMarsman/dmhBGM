@@ -5,33 +5,27 @@
 using namespace Rcpp;
 
 
-IntegerVector data_gibbs_person(IntegerMatrix data,
-                                int iter,
-                                int no_nodes,
-                                int person,
-                                NumericMatrix interactions,
-                                NumericMatrix thresholds,
-                                IntegerVector no_categories,
-                                int max_no_categories) {
-
+void data_gibbs_person(IntegerMatrix augmented_data,
+                       int iter,
+                       int no_nodes,
+                       int person,
+                       NumericMatrix interactions,
+                       NumericMatrix thresholds,
+                       IntegerVector no_categories,
+                       int max_no_categories) {
   double rest_score;
   double exponent;
   double cumsum;
   double u;
   int score;
   NumericVector probabilities(max_no_categories + 1);
-  IntegerVector augmented_data (no_nodes);
-
-  // Fixed starting values -------------------------------------------
-  for(int node = 0; node < no_nodes; node++) {
-    augmented_data(node) = data(person, node);
-  }
 
   for(int iteration = 0; iteration < iter; iteration++) {
     for(int node = 0; node < no_nodes; node++) {
       rest_score = 0.0;
       for(int vertex = 0; vertex < no_nodes; vertex++) {
-        rest_score += augmented_data(vertex) * interactions(vertex, node);
+        rest_score += augmented_data(person, vertex) *
+          interactions(vertex, node);
       }
 
       cumsum = 1.0;
@@ -49,11 +43,9 @@ IntegerVector data_gibbs_person(IntegerMatrix data,
       while (u > probabilities[score]) {
         score++;
       }
-      augmented_data(node) = score;
+      augmented_data(person, node) = score;
     }
   }
-
-  return augmented_data;
 }
 
 IntegerMatrix data_gibbs(IntegerMatrix data,
@@ -71,19 +63,23 @@ IntegerMatrix data_gibbs(IntegerMatrix data,
     }
   }
 
+  // Fixed starting values -------------------------------------------
+  for(int node = 0; node < no_nodes; node++) {
+    for(int person = 0; person < no_states; person++) {
+      augmented_data(person, node) = data(person, node);
+    }
+  }
+
   //The Gibbs sampler ----------------------------------------------------------
   for(int person =  0; person < no_states; person++) {
-    IntegerVector out = data_gibbs_person(data,
-                                          iter,
-                                          no_nodes,
-                                          person,
-                                          interactions,
-                                          thresholds,
-                                          no_categories,
-                                          max_no_categories);
-    for(int node = 0; node < no_nodes; node++) {
-      augmented_data(person, node) = out(node);
-    }
+    data_gibbs_person(augmented_data,
+                      iter,
+                      no_nodes,
+                      person,
+                      interactions,
+                      thresholds,
+                      no_categories,
+                      max_no_categories);
     Rcpp::checkUserInterrupt();
   }
 
