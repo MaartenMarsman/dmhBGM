@@ -3,8 +3,14 @@ Title: Bayesian Variable Selection for Networks of Binary and/or Ordinal Variabl
 Version: 0.0.1
 Date: 2023-11-16
 Authors@R: 
+    c(
     person("Maarten", "Marsman", , "m.marsman@uva.nl", role = c("aut", "cre"),
-           comment = c(ORCID = "0000-0001-5309-7502"))
+           comment = c(ORCID = "0000-0001-5309-7502")),
+    person("Nikola", "Sekulovski", role = "ctb",
+           comment = c(ORCID = "0000-0001-7032-1684")),
+    person("Don", "van den Bergh", role = "ctb",
+    comment = c(ORCID = "0000-0002-9838-7308"))
+  )
 Description: Bayesian variable selection methods for analyzing the structure of a Markov Random Field model for a network of binary and/or ordinal variables. Details of the implemented methods can be found in: Marsman and Haslbeck (2023) <doi:10.31234/osf.io/ukwrf>.
 License: GPL (>= 3)
 Encoding: UTF-8
