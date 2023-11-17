@@ -35,7 +35,7 @@
 #' @param burnin The number of iterations of the Gibbs sampler before its output
 #' is saved. Since it may take some time for the Gibbs sampler to converge to
 #' the posterior distribution, it is recommended not to set this number too low.
-#' @param dmhsampless The DMH approach generates a new, augmented data set to
+#' @param dmhsamples The DMH approach generates a new, augmented data set to
 #' update model parameters with Metropolis Hastings. It must generate a new
 #' augmented data set for each parameter of the model in each iteration of the
 #' Gibbs sampler. Since we cannot sample these data directly from the MRF, we
