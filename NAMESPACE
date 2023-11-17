@@ -2,6 +2,7 @@
 
 export(dmhbgm)
 importFrom(Rcpp,evalCpp)
+importFrom(RcppParallel,RcppParallelLibs)
 importFrom(Rdpack,reprompt)
 importFrom(methods,hasArg)
 useDynLib(dmhBGM, .registration=TRUE)

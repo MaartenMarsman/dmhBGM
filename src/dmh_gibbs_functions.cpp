@@ -2,6 +2,7 @@
 #include <Rcpp.h>
 #include <progress.hpp>
 #include <progress_bar.hpp>
+#include "data_gibbs_person_parallel.h"
 using namespace Rcpp;
 
 
@@ -52,10 +53,11 @@ IntegerMatrix data_gibbs(IntegerMatrix data,
                          IntegerVector no_categories,
                          NumericMatrix interactions,
                          NumericMatrix thresholds,
-                         int iter = 1) {
+                         int iter = 1,
+                         bool parallel = false) {
   int no_states = data.nrow();
   int no_nodes = data.ncol();
-  IntegerMatrix augmented_data(no_states, no_nodes);
+  IntegerMatrix augmented_data = Rcpp::clone(data);//(no_states, no_nodes);
   int max_no_categories = 0;
   for(int node = 0; node < no_nodes; node++) {
     if(no_categories[node] > max_no_categories) {
@@ -71,16 +73,44 @@ IntegerMatrix data_gibbs(IntegerMatrix data,
   }
 
   //The Gibbs sampler ----------------------------------------------------------
-  for(int person =  0; person < no_states; person++) {
-    data_gibbs_person(augmented_data,
-                      iter,
-                      no_nodes,
-                      person,
-                      interactions,
-                      thresholds,
-                      no_categories,
-                      max_no_categories);
-    Rcpp::checkUserInterrupt();
+  if (parallel) {
+    data_gibbs_person_parallel(
+      interactions,
+      thresholds,
+      data,
+      no_categories,
+      no_states,
+      iter,
+      no_nodes,
+      max_no_categories,
+      augmented_data
+    );
+  } else {
+    data_gibbs_person_serial(
+      interactions,
+      thresholds,
+      data,
+      no_categories,
+      no_states,
+      iter,
+      no_nodes,
+      max_no_categories,
+      augmented_data
+    );
+    // for(int person =  0; person < no_states; person++) {
+    //   IntegerVector out = data_gibbs_person(data,
+    //                                         iter,
+    //                                         no_nodes,
+    //                                         person,
+    //                                         interactions,
+    //                                         thresholds,
+    //                                         no_categories,
+    //                                         max_no_categories);
+    //   for(int node = 0; node < no_nodes; node++) {
+    //     augmented_data(person, node) = out(node);
+    //   }
+    //   Rcpp::checkUserInterrupt();
+    // }
   }
 
   return augmented_data;
@@ -97,7 +127,8 @@ List dmh_thresholds(NumericMatrix interactions,
                     double threshold_beta,
                     NumericMatrix proposal_threshold_sd,
                     int m,
-                    int t) {
+                    int t,
+                    bool parallel = false) {
 
   double log_prob;
   double current_state, proposed_state;
@@ -125,7 +156,8 @@ List dmh_thresholds(NumericMatrix interactions,
                                   no_categories,
                                   interactions,
                                   thresholds,
-                                  m);
+                                  m,
+                                  parallel);
 
       o_ast = 0;
       for(int v = 0; v < no_persons; v++) {
@@ -180,7 +212,8 @@ List dmh_interactions_cauchy(NumericMatrix interactions,
                              double cauchy_scale,
                              NumericMatrix proposal_interaction_sd,
                              int m,
-                             int t) {
+                             int t,
+                             const bool parallel) {
   double proposed_state;
   double current_state;
   double log_prob;
@@ -209,7 +242,8 @@ List dmh_interactions_cauchy(NumericMatrix interactions,
                                     no_categories,
                                     interactions,
                                     thresholds,
-                                    m);
+                                    m,
+                                    parallel);
 
         int o_ast = 0;
         for(int v = 0; v < no_persons; v++) {
@@ -262,7 +296,8 @@ List dmh_edge_interaction_pair_cauchy(NumericMatrix interactions,
                                       double cauchy_scale,
                                       NumericMatrix theta,
                                       NumericMatrix proposal_interaction_sd,
-                                      int m) {
+                                      int m,
+                                      const bool parallel) {
   double proposed_state;
   double current_state;
   double log_prob;
@@ -294,7 +329,8 @@ List dmh_edge_interaction_pair_cauchy(NumericMatrix interactions,
                                 no_categories,
                                 interactions,
                                 thresholds,
-                                m);
+                                m,
+                                parallel);
 
     int o_ast = 0;
     for(int v = 0; v < no_persons; v++) {
@@ -356,7 +392,8 @@ List dmh_gibbs_step_gm(IntegerMatrix observations,
                        IntegerMatrix gamma,
                        NumericMatrix interactions,
                        NumericMatrix thresholds,
-                       NumericMatrix theta) {
+                       NumericMatrix theta,
+                       const bool parallel) {
 
   if(true) {
     List out = dmh_edge_interaction_pair_cauchy(interactions,
@@ -371,7 +408,8 @@ List dmh_gibbs_step_gm(IntegerMatrix observations,
                                                 cauchy_scale,
                                                 theta,
                                                 proposal_interaction_sd,
-                                                m);
+                                                m,
+                                                parallel);
     IntegerMatrix gamma = out["gamma"];
     NumericMatrix interactions = out["interactions"];
   }
@@ -389,7 +427,8 @@ List dmh_gibbs_step_gm(IntegerMatrix observations,
                                        cauchy_scale,
                                        proposal_interaction_sd,
                                        m,
-                                       t);
+                                       t,
+                                       parallel);
 
     NumericMatrix interactions = out["interactions"];
     NumericMatrix proposal_interaction_sd = out["proposal_interaction_sd"];
@@ -408,7 +447,8 @@ List dmh_gibbs_step_gm(IntegerMatrix observations,
                               threshold_beta,
                               proposal_threshold_sd,
                               m,
-                              t);
+                              t,
+                              parallel);
     NumericMatrix thresholds = out["thresholds"];
     NumericMatrix proposal_threshold_sd = out["proposal_threshold_sd"];
   }
@@ -446,7 +486,8 @@ List dmh_gibbs_sampler(IntegerMatrix observations,
                        int iter,
                        int burnin,
                        bool save = false,
-                       bool display_progress = false) {
+                       bool display_progress = false,
+                       bool parallel = false) {
   int cntr;
   int no_nodes = observations.ncol();
   int no_persons = observations.nrow();
@@ -499,6 +540,8 @@ List dmh_gibbs_sampler(IntegerMatrix observations,
       index(cntr, 2) = Index(order[cntr], 2);
     }
 
+    // Rcpp::Rcout << "dmh_gibbs_step_gm: i " << iteration << std::endl;
+    // std::flush();
     List out = dmh_gibbs_step_gm(observations,
                                  O_thresholds,
                                  O_interactions,
@@ -518,7 +561,8 @@ List dmh_gibbs_sampler(IntegerMatrix observations,
                                  gamma,
                                  interactions,
                                  thresholds,
-                                 theta);
+                                 theta,
+                                 parallel);
 
     IntegerMatrix gamma = out["gamma"];
     NumericMatrix interactions = out["interactions"];
@@ -568,6 +612,7 @@ List dmh_gibbs_sampler(IntegerMatrix observations,
       index(cntr, 2) = Index(order[cntr], 2);
     }
 
+    // Rcpp::Rcout << "dmh_gibbs_step_gm: i " << iteration << std::endl;
     List out = dmh_gibbs_step_gm(observations,
                                  O_thresholds,
                                  O_interactions,
@@ -587,7 +632,8 @@ List dmh_gibbs_sampler(IntegerMatrix observations,
                                  gamma,
                                  interactions,
                                  thresholds,
-                                 theta);
+                                 theta,
+                                 parallel);
 
     IntegerMatrix gamma = out["gamma"];
     NumericMatrix interactions = out["interactions"];
