@@ -5,50 +5,9 @@
 #include "data_gibbs_person_parallel.h"
 using namespace Rcpp;
 
-
-void data_gibbs_person(IntegerMatrix augmented_data,
-                       int iter,
-                       int no_nodes,
-                       int person,
-                       NumericMatrix interactions,
-                       NumericMatrix thresholds,
-                       IntegerVector no_categories,
-                       int max_no_categories) {
-  double rest_score;
-  double exponent;
-  double cumsum;
-  double u;
-  int score;
-  NumericVector probabilities(max_no_categories + 1);
-
-  for(int iteration = 0; iteration < iter; iteration++) {
-    for(int node = 0; node < no_nodes; node++) {
-      rest_score = 0.0;
-      for(int vertex = 0; vertex < no_nodes; vertex++) {
-        rest_score += augmented_data(person, vertex) *
-          interactions(vertex, node);
-      }
-
-      cumsum = 1.0;
-      probabilities[0] = 1.0;
-      for(int category = 0; category < no_categories[node]; category++) {
-        exponent = thresholds(node, category);
-        exponent += (category + 1) * rest_score;
-        cumsum += std::exp(exponent);
-        probabilities[category + 1] = cumsum;
-      }
-
-      u = cumsum * R::unif_rand();
-
-      score = 0;
-      while (u > probabilities[score]) {
-        score++;
-      }
-      augmented_data(person, node) = score;
-    }
-  }
-}
-
+// ----------------------------------------------------------------------------|
+// Gibbs sampler for the augmented data that is used in DMH
+// ----------------------------------------------------------------------------|
 IntegerMatrix data_gibbs(IntegerMatrix data,
                          IntegerVector no_categories,
                          NumericMatrix interactions,
@@ -57,7 +16,7 @@ IntegerMatrix data_gibbs(IntegerMatrix data,
                          bool parallel = false) {
   int no_states = data.nrow();
   int no_nodes = data.ncol();
-  IntegerMatrix augmented_data = Rcpp::clone(data);//(no_states, no_nodes);
+  IntegerMatrix augmented_data = Rcpp::clone(data);
   int max_no_categories = 0;
   for(int node = 0; node < no_nodes; node++) {
     if(no_categories[node] > max_no_categories) {
@@ -65,7 +24,7 @@ IntegerMatrix data_gibbs(IntegerMatrix data,
     }
   }
 
-  // Fixed starting values -------------------------------------------
+  // Fixed starting values -----------------------------------------------------
   for(int node = 0; node < no_nodes; node++) {
     for(int person = 0; person < no_states; person++) {
       augmented_data(person, node) = data(person, node);
@@ -74,48 +33,34 @@ IntegerMatrix data_gibbs(IntegerMatrix data,
 
   //The Gibbs sampler ----------------------------------------------------------
   if (parallel) {
-    data_gibbs_person_parallel(
-      interactions,
-      thresholds,
-      data,
-      no_categories,
-      no_states,
-      iter,
-      no_nodes,
-      max_no_categories,
-      augmented_data
-    );
+    data_gibbs_person_parallel(interactions,
+                               thresholds,
+                               data,
+                               no_categories,
+                               no_states,
+                               iter,
+                               no_nodes,
+                               max_no_categories,
+                               augmented_data);
   } else {
-    data_gibbs_person_serial(
-      interactions,
-      thresholds,
-      data,
-      no_categories,
-      no_states,
-      iter,
-      no_nodes,
-      max_no_categories,
-      augmented_data
-    );
-    // for(int person =  0; person < no_states; person++) {
-    //   IntegerVector out = data_gibbs_person(data,
-    //                                         iter,
-    //                                         no_nodes,
-    //                                         person,
-    //                                         interactions,
-    //                                         thresholds,
-    //                                         no_categories,
-    //                                         max_no_categories);
-    //   for(int node = 0; node < no_nodes; node++) {
-    //     augmented_data(person, node) = out(node);
-    //   }
-    //   Rcpp::checkUserInterrupt();
-    // }
+    data_gibbs_person_serial(interactions,
+                             thresholds,
+                             data,
+                             no_categories,
+                             no_states,
+                             iter,
+                             no_nodes,
+                             max_no_categories,
+                             augmented_data);
   }
 
   return augmented_data;
 }
 
+
+// ----------------------------------------------------------------------------|
+// DMH algorithm to sample from the full-conditional of the threshold parameters
+// ----------------------------------------------------------------------------|
 List dmh_thresholds(NumericMatrix interactions,
                     NumericMatrix thresholds,
                     IntegerMatrix observations,
@@ -201,6 +146,10 @@ List dmh_thresholds(NumericMatrix interactions,
                       Named("proposal_threshold_sd") = proposal_threshold_sd);
 }
 
+// ----------------------------------------------------------------------------|
+// DMH algorithm to sample from the cull-conditional of the active interaction
+//  parameters (using a cauchy prior)
+// ----------------------------------------------------------------------------|
 List dmh_interactions_cauchy(NumericMatrix interactions,
                              NumericMatrix thresholds,
                              IntegerMatrix gamma,
@@ -284,6 +233,10 @@ List dmh_interactions_cauchy(NumericMatrix interactions,
                       Named("proposal_interaction_sd") = proposal_interaction_sd);
 }
 
+// ----------------------------------------------------------------------------|
+// DMH algorithm to sample from the cull-conditional of an edge + interaction
+//  pair (using a cauchy prior)
+// ----------------------------------------------------------------------------|
 List dmh_edge_interaction_pair_cauchy(NumericMatrix interactions,
                                       NumericMatrix thresholds,
                                       IntegerMatrix gamma,
@@ -462,7 +415,7 @@ List dmh_gibbs_step_gm(IntegerMatrix observations,
 
 
 // ----------------------------------------------------------------------------|
-// The DMH Gibbs sampler
+// The Gibbs sampler
 // ----------------------------------------------------------------------------|
 // [[Rcpp::export]]
 List dmh_gibbs_sampler(IntegerMatrix observations,

@@ -1,7 +1,7 @@
 #' Bayesian structure learning in Markov Random Fields of mixed binary and
 #' ordinal variables using MCMC.
 #'
-#' The function \code{bgm} explores the joint posterior distribution of
+#' The function \code{dbgm} explores the joint posterior distribution of
 #' structures and parameters in a Markov Random Field for mixed binary and
 #' ordinal variables.
 #'
@@ -82,7 +82,7 @@
 #' Defaults to \code{TRUE}.
 #'
 #' @return If \code{save = FALSE} (the default), the result is a list of class
-#' ``bgms'' containing the following matrices:
+#' ``dmhBGM'' containing the following matrices:
 #' \itemize{
 #' \item \code{gamma}: A matrix with \code{p} rows and \code{p} columns,
 #' containing posterior inclusion probabilities of individual edges.
@@ -92,7 +92,7 @@
 #' columns, containing model-averaged category thresholds.
 #' }
 #'
-#' If \code{save = TRUE}, the result is a list of class ``bgms'' containing:
+#' If \code{save = TRUE}, the result is a list of class ``dmhBGM'' containing:
 #' \itemize{
 #' \item \code{gamma}: A matrix with \code{iter} rows and
 #' \code{p * (p - 1) / 2} columns, containing the edge inclusion indicators from
@@ -111,20 +111,20 @@
 #'
 #' @importFrom RcppParallel RcppParallelLibs
 #' @export
-dmhbgm = function(x,
-                  iter = 1e4,
-                  burnin = 1e3,
-                  dmhsamples = 1,
-                  cauchy_scale = 2.5,
-                  edge_prior = c("Bernoulli", "Beta-Bernoulli"),
-                  inclusion_probability = 0.5,
-                  beta_bernoulli_alpha = 1,
-                  beta_bernoulli_beta = 1,
-                  threshold_alpha = 0.5,
-                  threshold_beta = 0.5,
-                  save = FALSE,
-                  display_progress = TRUE,
-                  parallel = FALSE) {
+dbgm = function(x,
+               iter = 1e4,
+               burnin = 1e3,
+               dmhsamples = 1,
+               cauchy_scale = 2.5,
+               edge_prior = c("Bernoulli", "Beta-Bernoulli"),
+               inclusion_probability = 0.5,
+               beta_bernoulli_alpha = 1,
+               beta_bernoulli_beta = 1,
+               threshold_alpha = 0.5,
+               threshold_beta = 0.5,
+               save = FALSE,
+               display_progress = TRUE,
+               parallel = FALSE) {
 
   #Check data input ------------------------------------------------------------
   if(!inherits(x, what = "matrix") && !inherits(x, what = "data.frame"))
@@ -243,8 +243,8 @@ dmhbgm = function(x,
 
   #Precomputing number of observations per category for each node.
   O_thresholds = matrix(0,
-                     nrow = max(no_categories) + 1,
-                     ncol = no_nodes)
+                        nrow = max(no_categories) + 1,
+                        ncol = no_nodes)
   for(node in 1:no_nodes) {
     for(category in 0:no_categories[node]) {
       O_thresholds[category + 1, node] = sum(x[, node] == category)

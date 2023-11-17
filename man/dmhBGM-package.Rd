@@ -4,7 +4,7 @@
 \name{dmhBGM-package}
 \alias{dmhBGM}
 \alias{dmhBGM-package}
-\title{bgms: Bayesian Analysis of Graphical Models}
+\title{dmhBGM: Bayesian Analysis of Graphical Models using DMH}
 \description{
 The \code{R} package \strong{dmhBGM} is a derivative of the \code{R} package
 \strong{bgms} version \code{0.1.2}. The latter package provides tools for
@@ -27,6 +27,12 @@ Metropolis approach for mixtures of mutually singular distributions
 }
 \author{
 \strong{Maintainer}: Maarten Marsman \email{m.marsman@uva.nl} (\href{https://orcid.org/0000-0001-5309-7502}{ORCID})
+
+Other contributors:
+\itemize{
+  \item Nikola Sekulovski (\href{https://orcid.org/0000-0001-7032-1684}{ORCID}) [contributor]
+  \item Don van den Bergh (\href{https://orcid.org/0000-0002-9838-7308}{ORCID}) [contributor]
+}
 
 }
 \keyword{internal}
