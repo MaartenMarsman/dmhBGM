@@ -10,9 +10,27 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// data_gibbs_person_parallel
+void data_gibbs_person_parallel(const NumericMatrix interactions, const NumericMatrix thresholds, const IntegerMatrix data, const IntegerVector no_categories, const int no_persons, const int iter, const int no_nodes, const int max_no_categories, IntegerMatrix augmented_data);
+RcppExport SEXP _dmhBGM_data_gibbs_person_parallel(SEXP interactionsSEXP, SEXP thresholdsSEXP, SEXP dataSEXP, SEXP no_categoriesSEXP, SEXP no_personsSEXP, SEXP iterSEXP, SEXP no_nodesSEXP, SEXP max_no_categoriesSEXP, SEXP augmented_dataSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const NumericMatrix >::type interactions(interactionsSEXP);
+    Rcpp::traits::input_parameter< const NumericMatrix >::type thresholds(thresholdsSEXP);
+    Rcpp::traits::input_parameter< const IntegerMatrix >::type data(dataSEXP);
+    Rcpp::traits::input_parameter< const IntegerVector >::type no_categories(no_categoriesSEXP);
+    Rcpp::traits::input_parameter< const int >::type no_persons(no_personsSEXP);
+    Rcpp::traits::input_parameter< const int >::type iter(iterSEXP);
+    Rcpp::traits::input_parameter< const int >::type no_nodes(no_nodesSEXP);
+    Rcpp::traits::input_parameter< const int >::type max_no_categories(max_no_categoriesSEXP);
+    Rcpp::traits::input_parameter< IntegerMatrix >::type augmented_data(augmented_dataSEXP);
+    data_gibbs_person_parallel(interactions, thresholds, data, no_categories, no_persons, iter, no_nodes, max_no_categories, augmented_data);
+    return R_NilValue;
+END_RCPP
+}
 // dmh_gibbs_sampler
-List dmh_gibbs_sampler(IntegerMatrix observations, IntegerMatrix O_thresholds, IntegerMatrix O_interactions, int m, IntegerVector no_categories, IntegerMatrix Index, NumericMatrix proposal_threshold_sd, NumericMatrix proposal_interaction_sd, double cauchy_scale, double threshold_alpha, double threshold_beta, String edge_prior, NumericMatrix theta, double beta_bernoulli_alpha, double beta_bernoulli_beta, IntegerMatrix gamma, NumericMatrix interactions, NumericMatrix thresholds, int iter, int burnin, bool save, bool display_progress);
-RcppExport SEXP _dmhBGM_dmh_gibbs_sampler(SEXP observationsSEXP, SEXP O_thresholdsSEXP, SEXP O_interactionsSEXP, SEXP mSEXP, SEXP no_categoriesSEXP, SEXP IndexSEXP, SEXP proposal_threshold_sdSEXP, SEXP proposal_interaction_sdSEXP, SEXP cauchy_scaleSEXP, SEXP threshold_alphaSEXP, SEXP threshold_betaSEXP, SEXP edge_priorSEXP, SEXP thetaSEXP, SEXP beta_bernoulli_alphaSEXP, SEXP beta_bernoulli_betaSEXP, SEXP gammaSEXP, SEXP interactionsSEXP, SEXP thresholdsSEXP, SEXP iterSEXP, SEXP burninSEXP, SEXP saveSEXP, SEXP display_progressSEXP) {
+List dmh_gibbs_sampler(IntegerMatrix observations, IntegerMatrix O_thresholds, IntegerMatrix O_interactions, int m, IntegerVector no_categories, IntegerMatrix Index, NumericMatrix proposal_threshold_sd, NumericMatrix proposal_interaction_sd, double cauchy_scale, double threshold_alpha, double threshold_beta, String edge_prior, NumericMatrix theta, double beta_bernoulli_alpha, double beta_bernoulli_beta, IntegerMatrix gamma, NumericMatrix interactions, NumericMatrix thresholds, int iter, int burnin, bool save, bool display_progress, bool parallel);
+RcppExport SEXP _dmhBGM_dmh_gibbs_sampler(SEXP observationsSEXP, SEXP O_thresholdsSEXP, SEXP O_interactionsSEXP, SEXP mSEXP, SEXP no_categoriesSEXP, SEXP IndexSEXP, SEXP proposal_threshold_sdSEXP, SEXP proposal_interaction_sdSEXP, SEXP cauchy_scaleSEXP, SEXP threshold_alphaSEXP, SEXP threshold_betaSEXP, SEXP edge_priorSEXP, SEXP thetaSEXP, SEXP beta_bernoulli_alphaSEXP, SEXP beta_bernoulli_betaSEXP, SEXP gammaSEXP, SEXP interactionsSEXP, SEXP thresholdsSEXP, SEXP iterSEXP, SEXP burninSEXP, SEXP saveSEXP, SEXP display_progressSEXP, SEXP parallelSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -38,13 +56,15 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type burnin(burninSEXP);
     Rcpp::traits::input_parameter< bool >::type save(saveSEXP);
     Rcpp::traits::input_parameter< bool >::type display_progress(display_progressSEXP);
-    rcpp_result_gen = Rcpp::wrap(dmh_gibbs_sampler(observations, O_thresholds, O_interactions, m, no_categories, Index, proposal_threshold_sd, proposal_interaction_sd, cauchy_scale, threshold_alpha, threshold_beta, edge_prior, theta, beta_bernoulli_alpha, beta_bernoulli_beta, gamma, interactions, thresholds, iter, burnin, save, display_progress));
+    Rcpp::traits::input_parameter< bool >::type parallel(parallelSEXP);
+    rcpp_result_gen = Rcpp::wrap(dmh_gibbs_sampler(observations, O_thresholds, O_interactions, m, no_categories, Index, proposal_threshold_sd, proposal_interaction_sd, cauchy_scale, threshold_alpha, threshold_beta, edge_prior, theta, beta_bernoulli_alpha, beta_bernoulli_beta, gamma, interactions, thresholds, iter, burnin, save, display_progress, parallel));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_dmhBGM_dmh_gibbs_sampler", (DL_FUNC) &_dmhBGM_dmh_gibbs_sampler, 22},
+    {"_dmhBGM_data_gibbs_person_parallel", (DL_FUNC) &_dmhBGM_data_gibbs_person_parallel, 9},
+    {"_dmhBGM_dmh_gibbs_sampler", (DL_FUNC) &_dmhBGM_dmh_gibbs_sampler, 23},
     {NULL, NULL, 0}
 };
 

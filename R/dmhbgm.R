@@ -109,6 +109,7 @@
 #' @references
 #' \insertAllCited{}
 #'
+#' @importFrom RcppParallel RcppParallelLibs
 #' @export
 dmhbgm = function(x,
                   iter = 1e4,
@@ -122,7 +123,8 @@ dmhbgm = function(x,
                   threshold_alpha = 0.5,
                   threshold_beta = 0.5,
                   save = FALSE,
-                  display_progress = TRUE) {
+                  display_progress = TRUE,
+                  parallel = FALSE) {
 
   #Check data input ------------------------------------------------------------
   if(!inherits(x, what = "matrix") && !inherits(x, what = "data.frame"))
@@ -286,7 +288,8 @@ dmhbgm = function(x,
                           iter = iter,
                           burnin = burnin,
                           save = save,
-                          display_progress = display_progress)
+                          display_progress = display_progress,
+                          parallel = parallel)
 
   #Preparing the output --------------------------------------------------------
   if(save == FALSE) {
