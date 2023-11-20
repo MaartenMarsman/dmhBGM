@@ -43,31 +43,22 @@ struct Data_Gibbs_Person : public Worker
   {}
 
   // sample for the persons I've been asked to
-  void operator()(std::size_t begin, std::size_t end)
-  {
-
-    // Rcpp::Rcout << "end: " << end << std::endl;
+  void operator()(std::size_t begin, std::size_t end) {
     double rest_score;
     double exponent;
     double cumsum;
     double u;
     int score;
-    // RVector<double> probabilities(max_no_categories + 1);
     double probabilities[max_no_categories + 1];
-    // NumericVector probabilities(max_no_categories + 1);
 
     for (std::size_t person = begin; person < end; person++ ) {
-
-      // Fixed starting values -------------------------------------------
-      // for(int node = 0; node < no_nodes; node++) {
-      //   augmented_data(person, node) = data(person, node);
-      // }
 
       for(int iteration = 0; iteration < iter; iteration++) {
         for(int node = 0; node < no_nodes; node++) {
           rest_score = 0.0;
           for(int vertex = 0; vertex < no_nodes; vertex++) {
-            rest_score += augmented_data(person, vertex) * interactions(vertex, node);
+            rest_score += augmented_data(person, vertex) *
+              interactions(vertex, node);
           }
 
           cumsum = 1.0;
@@ -88,11 +79,8 @@ struct Data_Gibbs_Person : public Worker
           augmented_data(person, node) = score;
         }
       }
-
     }
-
   }
-
 };
 
 
@@ -106,9 +94,7 @@ void data_gibbs_person_parallel(
     const int           iter,
     const int           no_nodes,
     const int           max_no_categories,
-          IntegerMatrix augmented_data
-)
-{
+          IntegerMatrix augmented_data) {
   Data_Gibbs_Person Data_Gibbs_Person_worker(
       interactions,
       thresholds,
@@ -123,9 +109,6 @@ void data_gibbs_person_parallel(
 
   // call parallelFor to do the work
   parallelFor(0, no_persons, Data_Gibbs_Person_worker);
-
-  // output is now modified in place
-
 }
 
 void data_gibbs_person_serial(
@@ -137,9 +120,7 @@ void data_gibbs_person_serial(
     const int           iter,
     const int           no_nodes,
     const int           max_no_categories,
-          IntegerMatrix augmented_data
-)
-{
+          IntegerMatrix augmented_data) {
 
   double rest_score;
   double exponent;
@@ -149,12 +130,6 @@ void data_gibbs_person_serial(
   NumericVector probabilities(max_no_categories + 1);
 
   for (std::size_t person = 0; person < no_persons; person++ ) {
-
-    // Fixed starting values -------------------------------------------
-    // for(int node = 0; node < no_nodes; node++) {
-    //   augmented_data(person, node) = data(person, node);
-    // }
-
     for(int iteration = 0; iteration < iter; iteration++) {
       for(int node = 0; node < no_nodes; node++) {
         rest_score = 0.0;
@@ -180,6 +155,5 @@ void data_gibbs_person_serial(
         augmented_data(person, node) = score;
       }
     }
-
   }
 }

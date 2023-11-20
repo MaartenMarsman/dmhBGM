@@ -13,12 +13,12 @@ reformat_data = function(x, na.action) {
       warning(paste0("There were ",
                      sum(missing_values),
                      " rows with missing observations in the input matrix x.\n",
-                     "Since dmhbgm cannot handle missing data, these rows were excluded \n",
+                     "Since dbgm cannot handle missing data, these rows were excluded \n",
                      "from the analysis."),
               call. = FALSE)
     if(sum(missing_values) == 1)
       warning(paste0("There was one row with missing observations in the input matrix x.\n",
-                     "Since dmhbgm cannot handle missing data, this rows was excluded \n",
+                     "Since dbgm cannot handle missing data, this rows was excluded \n",
                      "from the analysis."),
               call. = FALSE)
     x = x[!missing_values, ]

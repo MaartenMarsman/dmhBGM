@@ -24,13 +24,6 @@ IntegerMatrix data_gibbs(IntegerMatrix data,
     }
   }
 
-  // Fixed starting values -----------------------------------------------------
-  for(int node = 0; node < no_nodes; node++) {
-    for(int person = 0; person < no_states; person++) {
-      augmented_data(person, node) = data(person, node);
-    }
-  }
-
   //The Gibbs sampler ----------------------------------------------------------
   if (parallel) {
     data_gibbs_person_parallel(interactions,
