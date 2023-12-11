@@ -9,3 +9,7 @@ dmh_gibbs_sampler <- function(observations, O_thresholds, O_interactions, m, no_
     .Call(`_dmhBGM_dmh_gibbs_sampler`, observations, O_thresholds, O_interactions, m, no_categories, Index, proposal_threshold_sd, proposal_interaction_sd, cauchy_scale, threshold_alpha, threshold_beta, edge_prior, theta, beta_bernoulli_alpha, beta_bernoulli_beta, gamma, interactions, thresholds, iter, burnin, save, display_progress, parallel)
 }
 
+est_dmh_gibbs_sampler <- function(observations, O_thresholds, O_interactions, m, no_categories, Index, proposal_threshold_sd, proposal_interaction_sd, cauchy_scale, threshold_alpha, threshold_beta, interactions, thresholds, iter, burnin, save = FALSE, display_progress = FALSE, parallel = FALSE) {
+    .Call(`_dmhBGM_est_dmh_gibbs_sampler`, observations, O_thresholds, O_interactions, m, no_categories, Index, proposal_threshold_sd, proposal_interaction_sd, cauchy_scale, threshold_alpha, threshold_beta, interactions, thresholds, iter, burnin, save, display_progress, parallel)
+}
+
