@@ -87,7 +87,7 @@
 
 #'
 #' @return If \code{save = FALSE} (the default), the result is a list of class
-#' ``bgms'' containing the following matrices:
+#' ``dmhBGM'' containing the following matrices:
 #' \itemize{
 #' \item \code{gamma}: A matrix with \code{p} rows and \code{p} columns,
 #' containing posterior inclusion probabilities of individual edges.
@@ -116,7 +116,7 @@
 #'
 #' @importFrom RcppParallel RcppParallelLibs
 #' @export
-dmhbgm = function(x,
+dbgm = function(x,
                iter = 1e4,
                burnin = 1e3,
                dmhsamples = 1,
