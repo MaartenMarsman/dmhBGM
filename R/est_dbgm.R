@@ -54,6 +54,10 @@
 #' Defaults to \code{TRUE}.
 #' @param parallel Should data generation for the DMH algorithtm be parallelized?
 #' Defaults to \code{FALSE}.
+#' @param parallel Should the DMH iterations be run in parallel? Defaults to \code{FALSE}.
+#' @param no_cores If the iterations for DMH are run in parallel, how many cores should be used?
+#' Defaults to \link{\code{RcppParallel::defaultNumThreads() - 1}}.
+
 #'
 #' @return If \code{save = FALSE} (the default), the result is a list of class
 #' ``dmhBGM'' containing the following matrices:
@@ -89,7 +93,8 @@ est_dbgm = function(x,
                     threshold_beta = 0.5,
                     save = FALSE,
                     display_progress = TRUE,
-                    parallel = FALSE) {
+                    parallel = FALSE,
+                    no_cores = RcppParallel::defaultNumThreads() - 1) {
 
   #Check data input ------------------------------------------------------------
   if(!inherits(x, what = "matrix") && !inherits(x, what = "data.frame"))
@@ -127,6 +132,20 @@ est_dbgm = function(x,
     stop("Parameter ``threshold_alpha'' needs to be positive.")
   if(threshold_beta <= 0  | !is.finite(threshold_beta))
     stop("Parameter ``threshold_beta'' needs to be positive.")
+
+  #Check parallel arguments ----------------------------------------------------
+  if(!(isTRUE(parallel) || isFALSE(parallel)))
+    stop("Parameter ``parallel'' must be TRUE or FALSE.")
+  if(isTRUE(parallel)) {
+    if(no_cores <= 0)
+      stop("Parameter ``no_cores'' must be larger than 0.")
+
+    # ensure we nicely clean up any value set for RcppParallel::setThreadOptions
+    old_no_cores <- suppressWarnings(as.integer(Sys.getenv("RCPP_PARALLEL_NUM_THREADS", unset = NA)))
+    if(!is.na(old_no_cores))
+      on.exit(RcppParallel::setThreadOptions(numThreads = old_no_cores))
+    RcppParallel::setThreadOptions(numThreads = no_cores)
+  }
 
   #Check na.action -------------------------------------------------------------
   na.action = "listwise"
