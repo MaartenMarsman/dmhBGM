@@ -80,9 +80,14 @@
 #' @param display_progress Should the function show a progress bar
 #' (\code{display_progress = TRUE})? Or not (\code{display_progress = FALSE})?
 #' Defaults to \code{TRUE}.
+#' @param parallel Should the DMH iterations be run in parallel? Defaults to \code{FALSE}.
+#' Defaults to \code{TRUE}.
+#' @param no_cores If the iterations for DMH are run in parallel, how many cores should be used?
+#' Defaults to \link{\code{RcppParallel::defaultNumThreads() - 1}}.
+
 #'
 #' @return If \code{save = FALSE} (the default), the result is a list of class
-#' ``dmhBGM'' containing the following matrices:
+#' ``bgms'' containing the following matrices:
 #' \itemize{
 #' \item \code{gamma}: A matrix with \code{p} rows and \code{p} columns,
 #' containing posterior inclusion probabilities of individual edges.
@@ -111,7 +116,7 @@
 #'
 #' @importFrom RcppParallel RcppParallelLibs
 #' @export
-dbgm = function(x,
+dmhbgm = function(x,
                iter = 1e4,
                burnin = 1e3,
                dmhsamples = 1,
@@ -124,7 +129,8 @@ dbgm = function(x,
                threshold_beta = 0.5,
                save = FALSE,
                display_progress = TRUE,
-               parallel = FALSE) {
+               parallel = FALSE,
+               no_cores = RcppParallel::defaultNumThreads() - 1) {
 
   #Check data input ------------------------------------------------------------
   if(!inherits(x, what = "matrix") && !inherits(x, what = "data.frame"))
@@ -211,6 +217,20 @@ dbgm = function(x,
     stop("Parameter ``threshold_alpha'' needs to be positive.")
   if(threshold_beta <= 0  | !is.finite(threshold_beta))
     stop("Parameter ``threshold_beta'' needs to be positive.")
+
+  #Check parallel arguments
+  if(!isTRUE(parallel) || isFALSE(parallel))
+    stop("Parameter ``parallel'' must be TRUE or FALSE.")
+  if(isTRUE(parallel)) {
+    if(no_cores <= 0)
+      stop("Parameter ``no_cores'' must be larger than 0.")
+
+    # ensure we nicely clean up any value set for RcppParallel::setThreadOptions
+    old_no_cores <- Sys.getenv("RCPP_PARALLEL_NUM_THREADS", unset = NA)
+    if (!is.na(old_no_cores))
+      on.exit(RcppParallel::setThreadOptions(numThreads = old_no_cores))
+    RcppParallel::setThreadOptions(numThreads = no_cores)
+  }
 
   #Check na.action -------------------------------------------------------------
   na.action = "listwise"
