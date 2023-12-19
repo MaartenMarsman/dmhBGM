@@ -81,7 +81,6 @@
 #' (\code{display_progress = TRUE})? Or not (\code{display_progress = FALSE})?
 #' Defaults to \code{TRUE}.
 #' @param parallel Should the DMH iterations be run in parallel? Defaults to \code{FALSE}.
-#' Defaults to \code{TRUE}.
 #' @param no_cores If the iterations for DMH are run in parallel, how many cores should be used?
 #' Defaults to \link{\code{RcppParallel::defaultNumThreads() - 1}}.
 
@@ -218,16 +217,16 @@ dbgm = function(x,
   if(threshold_beta <= 0  | !is.finite(threshold_beta))
     stop("Parameter ``threshold_beta'' needs to be positive.")
 
-  #Check parallel arguments
-  if(!isTRUE(parallel) || isFALSE(parallel))
+  #Check parallel arguments ----------------------------------------------------
+  if(!(isTRUE(parallel) || isFALSE(parallel)))
     stop("Parameter ``parallel'' must be TRUE or FALSE.")
   if(isTRUE(parallel)) {
     if(no_cores <= 0)
       stop("Parameter ``no_cores'' must be larger than 0.")
 
     # ensure we nicely clean up any value set for RcppParallel::setThreadOptions
-    old_no_cores <- Sys.getenv("RCPP_PARALLEL_NUM_THREADS", unset = NA)
-    if (!is.na(old_no_cores))
+    old_no_cores <- suppressWarnings(as.integer(Sys.getenv("RCPP_PARALLEL_NUM_THREADS", unset = NA)))
+    if(!is.na(old_no_cores))
       on.exit(RcppParallel::setThreadOptions(numThreads = old_no_cores))
     RcppParallel::setThreadOptions(numThreads = no_cores)
   }
