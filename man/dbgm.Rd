@@ -2,8 +2,8 @@
 % Please edit documentation in R/dbgm.R
 \name{dbgm}
 \alias{dbgm}
-\title{Bayesian structure learning in Markov Random Fields of mixed binary and
-ordinal variables using MCMC.}
+\title{Bayesian edge selection or Bayesian estimation in Markov Random Fields of
+mixed binary and ordinal variables using MCMC and Double Metropolis Hastings.}
 \usage{
 dbgm(
   x,
@@ -11,12 +11,13 @@ dbgm(
   burnin = 1000,
   dmhsamples = 1,
   cauchy_scale = 2.5,
+  threshold_alpha = 0.5,
+  threshold_beta = 0.5,
+  edge_selection = TRUE,
   edge_prior = c("Bernoulli", "Beta-Bernoulli"),
   inclusion_probability = 0.5,
   beta_bernoulli_alpha = 1,
   beta_bernoulli_beta = 1,
-  threshold_alpha = 0.5,
-  threshold_beta = 0.5,
   save = FALSE,
   display_progress = TRUE,
   parallel = FALSE,
@@ -52,6 +53,18 @@ for at least \code{n * p} iterations.}
 \item{cauchy_scale}{The scale of the Cauchy prior for interactions. Defaults
 to \code{2.5}.}
 
+\item{threshold_alpha, threshold_beta}{The shape parameters of the beta-prime
+prior density for the threshold parameters. Must be positive values. If the
+two values are equal, the prior density is symmetric about zero. If
+\code{threshold_beta} is greater than \code{threshold_alpha}, the
+distribution is skewed to the left, and if \code{threshold_beta} is less than
+\code{threshold_alpha}, it is skewed to the right. Smaller values tend to
+lead to more diffuse prior distributions.}
+
+\item{edge_selection}{Should the function perform Bayesian edge selection on
+the edges of the MRF in addition to estimating its parameters, or should it
+only estimate the parameters. Defaults to \code{edge_selection = TRUE}.}
+
 \item{edge_prior}{The prior distribution for the edges or structure of the
 network. Two prior distributions are currently implemented: The Bernoulli
 model \code{edge_prior = "Bernoulli"} assumes that the probability that an
@@ -75,14 +88,6 @@ Defaults to \code{inclusion_probability = 0.5}.}
 the Beta prior density for the Bernoulli inclusion probability. Must be
 positive numbers. Defaults to \code{beta_bernoulli_alpha = 1} and
 \code{beta_bernoulli_beta = 1}.}
-
-\item{threshold_alpha, threshold_beta}{The shape parameters of the beta-prime
-prior density for the threshold parameters. Must be positive values. If the
-two values are equal, the prior density is symmetric about zero. If
-\code{threshold_beta} is greater than \code{threshold_alpha}, the
-distribution is skewed to the left, and if \code{threshold_beta} is less than
-\code{threshold_alpha}, it is skewed to the right. Smaller values tend to
-lead to more diffuse prior distributions.}
 
 \item{save}{Should the function collect and return all samples from the Gibbs
 sampler (\code{save = TRUE})? Or should it only return the (model-averaged)
@@ -125,26 +130,28 @@ Column averages of these matrices provide the model-averaged posterior means.
 }
 \description{
 The function \code{dbgm} explores the joint posterior distribution of
-structures and parameters in a Markov Random Field for mixed binary and
-ordinal variables.
+parameters and possibly edge indicators for a Markov Random Field for mixed
+binary and ordinal variables.
 }
 \details{
-A discrete spike and slab prior distribution is stipulated on the pairwise
-interactions. By formulating it as a mixture of mutually singular
-distributions, the function can use a combination of Metropolis-Hastings and
-Gibbs sampling to create a Markov chain that has the joint posterior
-distribution as invariant. This package uses Double Metropolis Hastings
-\insertCite{Liang_2010}{dmhBGM} to circumvent having to compute the
-intractable normalizing constant of the Markov Random Field, and uses an
-adaptive Metropolis to "learn" an optimal proposal distribution: Adjusting
+For Bayesian edge selection, a discrete spike and slab prior distribution is
+stipulated on the pairwise interactions. By formulating it as a mixture of
+mutually singular distributions, the function can use a combination of
+Metropolis-Hastings and Gibbs sampling to create a Markov chain that has the
+joint posterior distribution as invariant. This function uses Double
+Metropolis Hastings \insertCite{Liang_2010}{dmhBGM} to bypass the computation
+of the intractable normalizing constant of the Markov Random Field, and uses
+an adaptive Metropolis to "learn" an optimal proposal distribution: Adjusting
 the proposal variance to match the acceptance probability of the
 random walk Metropolis algorithm to be close to the optimum of \code{.234}
 using a Robbins-Monro type algorithm.
 
-The slab distribution is a Cauchy with an optional scaling parameter. A
-Beta-prime distribution is used for the exponent of the category parameters.
-Two prior distributions are implemented for edge inclusion variables (i.e.,
-the prior probability that an edge is included); the Bernoulli prior and the
+The slab distribution is a Cauchy with an optional scaling parameter. This
+slab distribution is also used as the prior distribution for the interaction
+parameters for Bayesian estimation. A Beta-prime distribution is used for the
+exponent of the category parameters. For Bayesian edge selection, two prior
+distributions are implemented for edge inclusion variables (i.e., the prior
+probability that an edge is included); the Bernoulli prior and the
 Beta-Bernoulli prior.
 }
 \references{

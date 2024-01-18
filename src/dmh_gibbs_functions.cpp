@@ -85,7 +85,7 @@ List dmh_thresholds(NumericMatrix interactions,
     for(int category = 0; category < no_categories[node]; category++) {
       current_state = thresholds(node, category);
       proposed_state = R::rnorm(current_state,
-                                       proposal_threshold_sd(node, category));
+                                proposal_threshold_sd(node, category));
 
       //We set it to current_state if we reject the proposed state
       thresholds(node, category) = proposed_state;
@@ -109,9 +109,9 @@ List dmh_thresholds(NumericMatrix interactions,
 
       //Second, we add the ratio of prior probabilities
       log_prob -= (threshold_alpha + threshold_beta) *
-         std::log(1 + std::exp(proposed_state));
+        std::log(1 + std::exp(proposed_state));
       log_prob += (threshold_alpha + threshold_beta) *
-         std::log(1 + std::exp(current_state));
+        std::log(1 + std::exp(current_state));
 
       U = std::log(R::unif_rand());
       if(U > log_prob) {
@@ -140,8 +140,8 @@ List dmh_thresholds(NumericMatrix interactions,
 }
 
 // ----------------------------------------------------------------------------|
-// DMH algorithm to sample from the cull-conditional of the active interaction
-//  parameters (using a cauchy prior)
+// DMH algorithm to sample from the full-conditional of the active interaction
+//  parameters (using a cauchy prior) for Bayesian edge selection
 // ----------------------------------------------------------------------------|
 List dmh_interactions_cauchy(NumericMatrix interactions,
                              NumericMatrix thresholds,
@@ -227,8 +227,8 @@ List dmh_interactions_cauchy(NumericMatrix interactions,
 }
 
 // ----------------------------------------------------------------------------|
-// DMH algorithm to sample from the cull-conditional of an edge + interaction
-//  pair (using a cauchy prior)
+// DMH algorithm to sample from the full-conditional of an edge + interaction
+//  pair (using a cauchy prior) for Bayesian edge selection
 // ----------------------------------------------------------------------------|
 List dmh_edge_interaction_pair_cauchy(NumericMatrix interactions,
                                       NumericMatrix thresholds,
@@ -317,7 +317,7 @@ List dmh_edge_interaction_pair_cauchy(NumericMatrix interactions,
 }
 
 // ----------------------------------------------------------------------------|
-// Gibbs step for graphical model parameters
+// A Gibbs step for graphical model parameters for Bayesian edge selection
 // ----------------------------------------------------------------------------|
 List dmh_gibbs_step_gm(IntegerMatrix observations,
                        IntegerMatrix O_thresholds,
@@ -408,7 +408,7 @@ List dmh_gibbs_step_gm(IntegerMatrix observations,
 
 
 // ----------------------------------------------------------------------------|
-// The Gibbs sampler
+// The Gibbs sampler for Bayesian edge selection
 // ----------------------------------------------------------------------------|
 // [[Rcpp::export]]
 List dmh_gibbs_sampler(IntegerMatrix observations,
@@ -657,21 +657,21 @@ List dmh_gibbs_sampler(IntegerMatrix observations,
 
 
 // ----------------------------------------------------------------------------|
-// DMH algorithm to sample from the cull-conditional of the all interaction
-//  parameters (using a cauchy prior)
+// DMH algorithm to sample from the full-conditional of the interaction
+//  parameters (using a cauchy prior) for Bayesian estimation
 // ----------------------------------------------------------------------------|
-List est_dmh_interactions_cauchy(NumericMatrix interactions,
-                                 NumericMatrix thresholds,
-                                 IntegerMatrix observations,
-                                 IntegerMatrix O_interactions,
-                                 IntegerVector no_categories,
-                                 int no_persons,
-                                 int no_nodes,
-                                 double cauchy_scale,
-                                 NumericMatrix proposal_interaction_sd,
-                                 int m,
-                                 int t,
-                                 const bool parallel) {
+List dmh_interactions_cauchy_estimation(NumericMatrix interactions,
+                                        NumericMatrix thresholds,
+                                        IntegerMatrix observations,
+                                        IntegerMatrix O_interactions,
+                                        IntegerVector no_categories,
+                                        int no_persons,
+                                        int no_nodes,
+                                        double cauchy_scale,
+                                        NumericMatrix proposal_interaction_sd,
+                                        int m,
+                                        int t,
+                                        const bool parallel) {
   double proposed_state;
   double current_state;
   double log_prob;
@@ -741,42 +741,42 @@ List est_dmh_interactions_cauchy(NumericMatrix interactions,
 }
 
 // ----------------------------------------------------------------------------|
-// Gibbs step for estimating graphical model parameters
+// A Gibbs step for graphical model parameters for Bayesian estimation
 // ----------------------------------------------------------------------------|
-List est_dmh_gibbs_step_gm(IntegerMatrix observations,
-                           IntegerMatrix O_thresholds,
-                           IntegerMatrix O_interactions,
-                           IntegerVector no_categories,
-                           int no_persons,
-                           int no_nodes,
-                           int no_interactions,
-                           int no_thresholds,
-                           IntegerMatrix index,
-                           NumericMatrix proposal_threshold_sd,
-                           NumericMatrix proposal_interaction_sd,
-                           int t,
-                           int m,
-                           double cauchy_scale,
-                           double threshold_alpha,
-                           double threshold_beta,
-                           NumericMatrix interactions,
-                           NumericMatrix thresholds,
-                           const bool parallel) {
+List dmh_gibbs_step_gm_estimation(IntegerMatrix observations,
+                                  IntegerMatrix O_thresholds,
+                                  IntegerMatrix O_interactions,
+                                  IntegerVector no_categories,
+                                  int no_persons,
+                                  int no_nodes,
+                                  int no_interactions,
+                                  int no_thresholds,
+                                  IntegerMatrix index,
+                                  NumericMatrix proposal_threshold_sd,
+                                  NumericMatrix proposal_interaction_sd,
+                                  int t,
+                                  int m,
+                                  double cauchy_scale,
+                                  double threshold_alpha,
+                                  double threshold_beta,
+                                  NumericMatrix interactions,
+                                  NumericMatrix thresholds,
+                                  const bool parallel) {
 
   //Update interactions (within model move)
   if(true) {
-    List out = est_dmh_interactions_cauchy(interactions,
-                                           thresholds,
-                                           observations,
-                                           O_interactions,
-                                           no_categories,
-                                           no_persons,
-                                           no_nodes,
-                                           cauchy_scale,
-                                           proposal_interaction_sd,
-                                           m,
-                                           t,
-                                           parallel);
+    List out = dmh_interactions_cauchy_estimation(interactions,
+                                                  thresholds,
+                                                  observations,
+                                                  O_interactions,
+                                                  no_categories,
+                                                  no_persons,
+                                                  no_nodes,
+                                                  cauchy_scale,
+                                                  proposal_interaction_sd,
+                                                  m,
+                                                  t,
+                                                  parallel);
 
     NumericMatrix interactions = out["interactions"];
     NumericMatrix proposal_interaction_sd = out["proposal_interaction_sd"];
@@ -809,27 +809,27 @@ List est_dmh_gibbs_step_gm(IntegerMatrix observations,
 
 
 // ----------------------------------------------------------------------------|
-// The Gibbs sampler for estimation
+// The Gibbs sampler for Bayesian estimation
 // ----------------------------------------------------------------------------|
 // [[Rcpp::export]]
-List est_dmh_gibbs_sampler(IntegerMatrix observations,
-                           IntegerMatrix O_thresholds,
-                           IntegerMatrix O_interactions,
-                           int m,
-                           IntegerVector no_categories,
-                           IntegerMatrix Index,
-                           NumericMatrix proposal_threshold_sd,
-                           NumericMatrix proposal_interaction_sd,
-                           double cauchy_scale,
-                           double threshold_alpha,
-                           double threshold_beta,
-                           NumericMatrix interactions,
-                           NumericMatrix thresholds,
-                           int iter,
-                           int burnin,
-                           bool save = false,
-                           bool display_progress = false,
-                           bool parallel = false) {
+List dmh_gibbs_sampler_estimation(IntegerMatrix observations,
+                                  IntegerMatrix O_thresholds,
+                                  IntegerMatrix O_interactions,
+                                  int m,
+                                  IntegerVector no_categories,
+                                  IntegerMatrix Index,
+                                  NumericMatrix proposal_threshold_sd,
+                                  NumericMatrix proposal_interaction_sd,
+                                  double cauchy_scale,
+                                  double threshold_alpha,
+                                  double threshold_beta,
+                                  NumericMatrix interactions,
+                                  NumericMatrix thresholds,
+                                  int iter,
+                                  int burnin,
+                                  bool save = false,
+                                  bool display_progress = false,
+                                  bool parallel = false) {
   int cntr;
   int no_nodes = observations.ncol();
   int no_persons = observations.nrow();
@@ -880,25 +880,25 @@ List est_dmh_gibbs_sampler(IntegerMatrix observations,
       index(cntr, 2) = Index(order[cntr], 2);
     }
 
-    List out = est_dmh_gibbs_step_gm(observations,
-                                     O_thresholds,
-                                     O_interactions,
-                                     no_categories,
-                                     no_persons,
-                                     no_nodes,
-                                     no_interactions,
-                                     no_thresholds,
-                                     index,
-                                     proposal_threshold_sd,
-                                     proposal_interaction_sd,
-                                     iteration + 1,
-                                     m,
-                                     cauchy_scale,
-                                     threshold_alpha,
-                                     threshold_beta,
-                                     interactions,
-                                     thresholds,
-                                     parallel);
+    List out = dmh_gibbs_step_gm_estimation(observations,
+                                            O_thresholds,
+                                            O_interactions,
+                                            no_categories,
+                                            no_persons,
+                                            no_nodes,
+                                            no_interactions,
+                                            no_thresholds,
+                                            index,
+                                            proposal_threshold_sd,
+                                            proposal_interaction_sd,
+                                            iteration + 1,
+                                            m,
+                                            cauchy_scale,
+                                            threshold_alpha,
+                                            threshold_beta,
+                                            interactions,
+                                            thresholds,
+                                            parallel);
 
     NumericMatrix interactions = out["interactions"];
     NumericMatrix thresholds = out["thresholds"];
@@ -927,25 +927,25 @@ List est_dmh_gibbs_sampler(IntegerMatrix observations,
       index(cntr, 2) = Index(order[cntr], 2);
     }
 
-    List out = est_dmh_gibbs_step_gm(observations,
-                                     O_thresholds,
-                                     O_interactions,
-                                     no_categories,
-                                     no_persons,
-                                     no_nodes,
-                                     no_interactions,
-                                     no_thresholds,
-                                     index,
-                                     proposal_threshold_sd,
-                                     proposal_interaction_sd,
-                                     iteration + 1,
-                                     m,
-                                     cauchy_scale,
-                                     threshold_alpha,
-                                     threshold_beta,
-                                     interactions,
-                                     thresholds,
-                                     parallel);
+    List out = dmh_gibbs_step_gm_estimation(observations,
+                                            O_thresholds,
+                                            O_interactions,
+                                            no_categories,
+                                            no_persons,
+                                            no_nodes,
+                                            no_interactions,
+                                            no_thresholds,
+                                            index,
+                                            proposal_threshold_sd,
+                                            proposal_interaction_sd,
+                                            iteration + 1,
+                                            m,
+                                            cauchy_scale,
+                                            threshold_alpha,
+                                            threshold_beta,
+                                            interactions,
+                                            thresholds,
+                                            parallel);
 
     NumericMatrix interactions = out["interactions"];
     NumericMatrix thresholds = out["thresholds"];
@@ -998,4 +998,3 @@ List est_dmh_gibbs_sampler(IntegerMatrix observations,
   return List::create(Named("interactions") = out_interactions,
                       Named("thresholds") = out_thresholds);
 }
-
