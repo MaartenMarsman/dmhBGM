@@ -19,7 +19,8 @@ dbgm(
   threshold_beta = 0.5,
   save = FALSE,
   display_progress = TRUE,
-  parallel = FALSE
+  parallel = FALSE,
+  no_cores = RcppParallel::defaultNumThreads() - 1
 )
 }
 \arguments{
@@ -90,6 +91,11 @@ posterior means (\code{save = FALSE})? Defaults to \code{FALSE}.}
 \item{display_progress}{Should the function show a progress bar
 (\code{display_progress = TRUE})? Or not (\code{display_progress = FALSE})?
 Defaults to \code{TRUE}.}
+
+\item{parallel}{Should the DMH iterations be run in parallel? Defaults to \code{FALSE}.}
+
+\item{no_cores}{If the iterations for DMH are run in parallel, how many cores should be used?
+Defaults to \code{RcppParallel::defaultNumThreads() - 1}.}
 }
 \value{
 If \code{save = FALSE} (the default), the result is a list of class

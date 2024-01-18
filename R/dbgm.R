@@ -82,8 +82,7 @@
 #' Defaults to \code{TRUE}.
 #' @param parallel Should the DMH iterations be run in parallel? Defaults to \code{FALSE}.
 #' @param no_cores If the iterations for DMH are run in parallel, how many cores should be used?
-#' Defaults to \link{\code{RcppParallel::defaultNumThreads() - 1}}.
-
+#' Defaults to \code{RcppParallel::defaultNumThreads() - 1}.
 #'
 #' @return If \code{save = FALSE} (the default), the result is a list of class
 #' ``dmhBGM'' containing the following matrices:

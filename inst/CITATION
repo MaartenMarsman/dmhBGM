@@ -1,0 +1,12 @@
+citHeader("To cite dmhBGM in publications use:")
+
+bibentry(
+  bibtype = "manual",
+  author = "Marsman, M. and Sekulovski, N. and van den Bergh, D.",
+  note = "R package version 0.0.1",
+  title = "dmhBGM: {B}ayesian analysis of graphical models with double Metropolis Hastings",
+  url = "https://github.com/MaartenMarsman/dmhBGM",
+  year = "2024",
+  textVersion = "Marsman, M., Sekulovski, N., & van den Bergh, D. (2024). dmhBGM: Bayesian Variable Selection for Networks of Binary and/or Ordinal Variables Using Double Metropolis Hastings. R package version 0.0.1. Retrieved from:
+  https://github.com/MaartenMarsman/dmhBGM"
+)

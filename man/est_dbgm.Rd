@@ -15,7 +15,8 @@ est_dbgm(
   threshold_beta = 0.5,
   save = FALSE,
   display_progress = TRUE,
-  parallel = FALSE
+  parallel = FALSE,
+  no_cores = RcppParallel::defaultNumThreads() - 1
 )
 }
 \arguments{
@@ -63,8 +64,10 @@ posterior means (\code{save = FALSE})? Defaults to \code{FALSE}.}
 (\code{display_progress = TRUE})? Or not (\code{display_progress = FALSE})?
 Defaults to \code{TRUE}.}
 
-\item{parallel}{Should data generation for the DMH algorithtm be parallelized?
-Defaults to \code{FALSE}.}
+\item{parallel}{Should the DMH iterations be run in parallel? Defaults to \code{FALSE}.}
+
+\item{no_cores}{If the iterations for DMH are run in parallel, how many cores should be used?
+Defaults to \link{\code{RcppParallel::defaultNumThreads() - 1}}.}
 }
 \value{
 If \code{save = FALSE} (the default), the result is a list of class
